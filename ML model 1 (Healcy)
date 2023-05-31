@@ -1,0 +1,56 @@
+import numpy as np
+import tensorflow as tf
+from tensorflow import keras
+
+# Mempersiapkan data training dan label
+# Contoh data detak jantung dari sensor
+heartbeat_data = np.array([
+    [0.2, 0.3, 0.4, 0.5, 0.3, 0.2],  # Data detak jantung 1
+    [0.1, 0.2, 0.3, 0.4, 0.2, 0.1],  # Data detak jantung 2
+    [0.4, 0.5, 0.2, 0.1, 0.3, 0.4],  # Data detak jantung 3
+    [0.3, 0.3, 0.2, 0.3, 0.2, 0.3],  # Data detak jantung 4
+    [0.2, 0.2, 0.3, 0.4, 0.4, 0.2]   # Data detak jantung 5
+])  # Ganti dengan data detak jantung yang sesuai
+
+labels = np.array([0, 1, 1, 0, 1])  # Ganti dengan label yang sesuai (0: normal, 1: tidak normal, dst.)
+
+# Melakukan preprocessing data
+# Misalnya, normalisasi atau pembagian data menjadi training set dan validation set
+train_data = heartbeat_data[:4]
+train_labels = labels[:4]
+val_data = heartbeat_data[4:]
+val_labels = labels[4:]
+
+# Membangun arsitektur model
+model = keras.Sequential([
+    keras.layers.Dense(64, activation='relu', input_shape=(heartbeat_data.shape[1],)),  # Hidden layer 1
+    keras.layers.Dense(64, activation='relu'),  # Hidden layer 2
+    keras.layers.Dense(2, activation='softmax')  # Output layer dengan 2 kelas (normal, tidak normal)
+])
+
+# Mengompilasi model
+model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+
+# Melatih model
+model.fit(train_data, train_labels, epochs=10, validation_data=(val_data, val_labels))
+
+# Evaluasi model
+test_loss, test_acc = model.evaluate(val_data, val_labels)
+print('Test accuracy:', test_acc)
+
+# Memprediksi detak jantung menggunakan model yang sudah dilatih
+new_data = np.array([
+                     [0.3, 0.3, 0.2, 0.3, 0.2, 0.3],
+                     [0.3, 0.3, 0.2, 0.3, 0.2, 0.3],
+                     [0.3, 0.3, 0.2, 0.3, 0.2, 0.3],
+                     [0.4, 0.5, 0.2, 0.1, 0.3, 0.4]])  # Ganti dengan data baru yang ingin diprediksi
+predictions = model.predict(new_data)
+
+# Mengambil label dengan nilai probabilitas tertinggi
+predicted_label = np.argmax(predictions)
+
+# Mencetak hasil prediksi
+if predicted_label == 0:
+    print("HORE NORMAL")
+else:
+    print("AYO PERIKSA")
